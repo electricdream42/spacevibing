@@ -136,6 +136,84 @@
             transition: opacity 0.5s;
             z-index: 100;
         }
+        
+        /* Mobile navigation controls */
+        #mobile-controls {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none; /* Hidden by default, shown on mobile */
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .nav-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .mobile-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            background-color: rgba(70, 130, 180, 0.6);
+            border: 2px solid white;
+            color: white;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        .mobile-btn:active {
+            background-color: rgba(70, 130, 180, 0.9);
+            transform: scale(0.95);
+        }
+        
+        #toggle-controls-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(70, 130, 180, 0.6);
+            border: 2px solid white;
+            color: white;
+            padding: 10px;
+            border-radius: 25px;
+            z-index: 100;
+            display: none; /* Hidden by default, shown on mobile */
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        
+        /* For devices in portrait orientation */
+        @media (max-width: 768px), (max-height: 768px) and (orientation: portrait) {
+            #toggle-controls-btn {
+                display: block;
+            }
+            #audio-controls {
+                bottom: 80px;
+                right: 10px;
+                padding: 5px 10px;
+            }
+            .info-overlay {
+                max-width: 250px;
+                font-size: 14px;
+            }
+            #title-card h1 {
+                font-size: 3em;
+            }
+            #title-card p {
+                font-size: 1.2em;
+                max-width: 90%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -150,7 +228,6 @@
     <div id="title-card">
         <h1>COSMIC ODYSSEY</h1>
         <p>Embark on an epic journey through the vastness of space. Witness breathtaking celestial wonders and explore the cosmos beyond imagination.</p>
-        <button id="start-journey">BEGIN JOURNEY</button>
     </div>
     
     <div id="info">Galactic Journey</div>

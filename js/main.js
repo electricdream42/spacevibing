@@ -30,6 +30,7 @@ let lastLocationChangeTime = 0;
 let starfieldObjects; // To store starfield and shooting stars
 let dramaticEventTriggered = false;
 let dramaticEventProgress = 0;
+let toggleControlBtn; // Control button for toggling between modes
 
 // Music control
 const backgroundMusic = document.getElementById('background-music');
@@ -178,44 +179,176 @@ function init() {
     // Handle window resize
     window.addEventListener('resize', onWindowResize);
     
-    // Toggle between auto-pilot and manual control with spacebar
-    window.addEventListener('keydown', (event) => {
-        if (event.code === 'Space') {
-            isAutoPilot = !isAutoPilot;
-            controls.enabled = !isAutoPilot;
-            
-            // Display mode change
-            const info = document.getElementById('info');
-            info.textContent = isAutoPilot ? 'Auto-Pilot Mode (Press SPACE for manual control)' : 'Manual Control Mode (Press SPACE for auto-pilot)';
-            info.style.opacity = 1;
-            setTimeout(() => { info.style.opacity = 0.5; }, 2000);
-        }
+    // Add mode toggle control button for touch devices
+    createModeToggleButton();
+    
+    // Add tap/click event to toggle between auto-pilot and manual control
+    renderer.domElement.addEventListener('click', function(event) {
+        // Ignore clicks when interacting with controls or other UI elements
+        if (event.target !== renderer.domElement) return;
+        
+        toggleControlMode();
     });
+    
+    // Add touch support for mobile devices
+    let touchStartTime = 0;
+    let touchStartPosition = { x: 0, y: 0 };
+    
+    renderer.domElement.addEventListener('touchstart', function(event) {
+        touchStartTime = Date.now();
+        touchStartPosition = {
+            x: event.touches[0].clientX,
+            y: event.touches[0].clientY
+        };
+    }, { passive: true });
+    
+    renderer.domElement.addEventListener('touchend', function(event) {
+        // Only handle taps, not swipes or long presses
+        const touchDuration = Date.now() - touchStartTime;
+        
+        if (touchDuration < 300) { // Short tap (less than 300ms)
+            // Check if it's a tap and not a drag
+            if (event.changedTouches.length > 0) {
+                const touchEndPosition = {
+                    x: event.changedTouches[0].clientX,
+                    y: event.changedTouches[0].clientY
+                };
+                
+                const distance = Math.sqrt(
+                    Math.pow(touchEndPosition.x - touchStartPosition.x, 2) +
+                    Math.pow(touchEndPosition.y - touchStartPosition.y, 2)
+                );
+                
+                // If it's a tap (not a swipe), toggle control mode
+                if (distance < 10) { // Less than 10px movement
+                    toggleControlMode();
+                }
+            }
+        }
+    }, { passive: true });
     
     // Hide loading screen once everything is ready
     loadingScreen.style.opacity = 0;
-    setTimeout(() => { loadingScreen.style.display = 'none'; }, 1000);
+    setTimeout(() => { 
+        loadingScreen.style.display = 'none'; 
+        // Auto-start the journey without requiring button press
+        startJourney();
+    }, 1000);
     
     // Set up music controls
     setupMusicControls();
+}
+
+// Create a button to toggle between auto-pilot and manual control modes
+function createModeToggleButton() {
+    toggleControlBtn = document.createElement('button');
+    toggleControlBtn.id = 'toggle-mode-btn';
+    toggleControlBtn.innerHTML = '🚀 Auto-Pilot';
+    toggleControlBtn.style.position = 'fixed';
+    toggleControlBtn.style.bottom = '20px';
+    toggleControlBtn.style.left = '20px';
+    toggleControlBtn.style.backgroundColor = 'rgba(70, 130, 180, 0.6)';
+    toggleControlBtn.style.border = '2px solid white';
+    toggleControlBtn.style.color = 'white';
+    toggleControlBtn.style.padding = '10px 15px';
+    toggleControlBtn.style.borderRadius = '25px';
+    toggleControlBtn.style.zIndex = '100';
+    toggleControlBtn.style.cursor = 'pointer';
+    toggleControlBtn.style.fontFamily = 'Arial, sans-serif';
+    toggleControlBtn.style.fontSize = '16px';
+    toggleControlBtn.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+    toggleControlBtn.style.backdropFilter = 'blur(5px)';
+    toggleControlBtn.style.transition = 'all 0.3s ease';
+    toggleControlBtn.style.WebkitTapHighlightColor = 'transparent';
     
-    // Set up start journey button
-    document.getElementById('start-journey').addEventListener('click', startJourney);
+    // Add touch-specific handling
+    toggleControlBtn.addEventListener('touchstart', function(e) {
+        e.preventDefault(); // Prevent default touch behavior
+        this.style.backgroundColor = 'rgba(70, 130, 180, 0.9)';
+        this.style.transform = 'scale(0.95)';
+    }, { passive: false });
+    
+    toggleControlBtn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        this.style.backgroundColor = 'rgba(70, 130, 180, 0.6)';
+        this.style.transform = 'scale(1)';
+        toggleControlMode();
+    }, { passive: false });
+    
+    // Mouse clicks for non-touch devices
+    toggleControlBtn.addEventListener('click', function(e) {
+        e.stopPropagation(); // Prevent the click from also triggering the renderer click
+        toggleControlMode();
+    });
+    
+    document.body.appendChild(toggleControlBtn);
+    
+    // Add a simple instruction tooltip
+    const tooltip = document.createElement('div');
+    tooltip.textContent = 'Tap anywhere to toggle control mode';
+    tooltip.style.position = 'fixed';
+    tooltip.style.bottom = '70px';
+    tooltip.style.left = '20px';
+    tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    tooltip.style.color = 'white';
+    tooltip.style.padding = '8px 12px';
+    tooltip.style.borderRadius = '15px';
+    tooltip.style.fontFamily = 'Arial, sans-serif';
+    tooltip.style.fontSize = '14px';
+    tooltip.style.zIndex = '99';
+    tooltip.style.opacity = '1';
+    tooltip.style.transition = 'opacity 0.5s ease';
+    
+    document.body.appendChild(tooltip);
+    
+    // Fade out tooltip after 6 seconds
+    setTimeout(() => {
+        tooltip.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(tooltip);
+        }, 500);
+    }, 6000);
+}
+
+// Toggle between auto-pilot and manual control modes
+function toggleControlMode() {
+    if (!journeyStarted) return;
+    
+    isAutoPilot = !isAutoPilot;
+    controls.enabled = !isAutoPilot;
+    
+    // Update button text
+    if (toggleControlBtn) {
+        toggleControlBtn.innerHTML = isAutoPilot ? '🚀 Auto-Pilot' : '🎮 Manual';
+    }
+    
+    // Display mode change
+    const info = document.getElementById('info');
+    info.textContent = isAutoPilot ? 'Auto-Pilot Mode' : 'Manual Control Mode';
+    info.style.opacity = 1;
+    setTimeout(() => { info.style.opacity = 0.5; }, 2000);
 }
 
 // Start the cosmic journey
 function startJourney() {
-    titleCard.style.opacity = 0;
-    setTimeout(() => { titleCard.style.display = 'none'; }, 2000);
+    if (journeyStarted) return; // Prevent multiple starts
+    
+    // Give users a moment to read the title card
+    setTimeout(() => {
+        titleCard.style.opacity = 0;
+        setTimeout(() => { titleCard.style.display = 'none'; }, 2000);
+    }, 3000); // 3 second delay before fading out
     
     // Start background music
-    backgroundMusic.play();
+    backgroundMusic.play().catch(e => {
+        console.log('Auto-play prevented by browser. User interaction required to play audio.');
+    });
     musicToggle.textContent = "⏸️";
     
     journeyStarted = true;
     
     // Set initial info text
-    document.getElementById('info').textContent = 'Auto-Pilot Mode (Press SPACE for manual control)';
+    document.getElementById('info').textContent = 'Auto-Pilot Mode - Tap to toggle controls';
 }
 
 // Set up a more dramatic camera path
