@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Journey - Space Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            color: white;
+            text-align: center;
+            z-index: 100;
+            font-family: Arial, sans-serif;
+        }
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            transition: opacity 1s ease-in-out;
+        }
+        .progress {
+            width: 300px;
+            height: 10px;
+            background-color: #111;
+            margin-top: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #4a69bd;
+            transition: width 0.3s;
+        }
+        #audio-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            z-index: 100;
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            border-radius: 25px;
+            backdrop-filter: blur(5px);
+        }
+        #volume-slider {
+            width: 80px;
+            margin: 0 10px;
+        }
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            outline: none;
+            padding: 0 5px;
+        }
+        #title-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 500;
+            font-family: Arial, sans-serif;
+            background-color: rgba(0, 0, 0, 0.7);
+            transition: opacity 2s ease-in-out;
+        }
+        #title-card h1 {
+            font-size: 4em;
+            margin-bottom: 0.2em;
+            text-shadow: 0 0 20px rgba(100, 149, 237, 0.8);
+            letter-spacing: 0.1em;
+        }
+        #title-card p {
+            font-size: 1.5em;
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        #start-journey {
+            padding: 12px 24px;
+            font-size: 1.2em;
+            background-color: rgba(70, 130, 180, 0.6);
+            border: 2px solid white;
+            color: white;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        #start-journey:hover {
+            background-color: rgba(70, 130, 180, 0.9);
+            transform: scale(1.05);
+        }
+        .info-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            max-width: 300px;
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <h2>Preparing your journey through the cosmos...</h2>
+        <div class="progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <p id="loading-text">Loading galaxy assets...</p>
+    </div>
+    
+    <div id="title-card">
+        <h1>COSMIC ODYSSEY</h1>
+        <p>Embark on an epic journey through the vastness of space. Witness breathtaking celestial wonders and explore the cosmos beyond imagination.</p>
+        <button id="start-journey">BEGIN JOURNEY</button>
+    </div>
+    
+    <div id="info">Galactic Journey</div>
+    
+    <div id="location-info" class="info-overlay"></div>
+    
+    <div id="audio-controls">
+        <button id="music-toggle" class="control-btn">▶️</button>
+        <input type="range" id="volume-slider" min="0" max="100" value="70">
+        <span id="volume-display">70%</span>
+    </div>
+    
+    <!-- Audio element for background music -->
+    <audio id="background-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/29/audio_85adcc013a.mp3?filename=ambient-space-138467.mp3" type="audio/mp3">
+        <!-- Fallback music URLs in case the first one doesn't work -->
+        <source src="https://cdn.pixabay.com/download/audio/2021/11/22/audio_33194d572c.mp3?filename=space-ambience-138647.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+    
+    <!-- Import Three.js from CDN -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    
+    <!-- Main script -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html> 
